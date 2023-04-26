@@ -1,1 +1,13 @@
-To Be Added
+# Make the folders structure
+
+# Create API routes
+
+# Create the database
+
+# Create the models
+
+# Create the controllers (handlers)
+
+# Dockerize the app
+
+# Deploy the app to k8s
