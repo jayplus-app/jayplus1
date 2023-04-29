@@ -1,8 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
+	"time"
 )
+
+const YYYYMMDD = "2006-01-02"
+
+type dateTimeListRequestPayload struct {
+	StartDate   string `json:"dateTime"`
+	ServiceType string `json:"serviceType"`
+	VehicleType string `json:"vehicleType"`
+}
 
 func (app *application) VehicleTypes(w http.ResponseWriter, r *http.Request) {
 	out := []byte(`{
@@ -45,6 +55,221 @@ func (app *application) ServiceTypes(w http.ResponseWriter, r *http.Request) {
 			}
 		]
 	}`)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
+}
+
+func (app *application) DateTimeList(w http.ResponseWriter, r *http.Request) {
+	var dateTimeListRequest dateTimeListRequestPayload
+
+	err := json.NewDecoder(r.Body).Decode(&dateTimeListRequest)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	// validate data
+
+	t, err := time.Parse(YYYYMMDD, dateTimeListRequest.StartDate)
+
+	out := []byte(`{
+        "` + t.Format(YYYYMMDD) + `": [
+            {
+                "start": "09:00",
+                "end": "10:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": false
+            },
+            {
+                "start": "10:00",
+                "end": "11:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": false
+            },
+            {
+                "start": "11:00",
+                "end": "12:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": false
+            },
+            {
+                "start": "12:00",
+                "end": "13:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "13:00",
+                "end": "14:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "14:00",
+                "end": "15:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "15:00",
+                "end": "16:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "16:00",
+                "end": "17:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "17:00",
+                "end": "18:00",
+                "freeMinutes": 180,
+                "available": false,
+                "isPast": true
+            }
+        ],
+        "` + t.Add(24*time.Hour).Format(YYYYMMDD) + `": [
+            {
+                "start": "09:00",
+                "end": "10:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "10:00",
+                "end": "11:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "11:00",
+                "end": "12:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "12:00",
+                "end": "13:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "13:00",
+                "end": "14:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "14:00",
+                "end": "15:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "15:00",
+                "end": "16:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "16:00",
+                "end": "17:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "17:00",
+                "end": "18:00",
+                "freeMinutes": 180,
+                "available": false,
+                "isPast": true
+            }
+        ],
+        "` + t.Add(48*time.Hour).Format(YYYYMMDD) + `": [
+            {
+                "start": "09:00",
+                "end": "10:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "10:00",
+                "end": "11:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "11:00",
+                "end": "12:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "12:00",
+                "end": "13:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "13:00",
+                "end": "14:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "14:00",
+                "end": "15:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "15:00",
+                "end": "16:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "16:00",
+                "end": "17:00",
+                "freeMinutes": 270,
+                "available": false,
+                "isPast": true
+            },
+            {
+                "start": "17:00",
+                "end": "18:00",
+                "freeMinutes": 180,
+                "available": false,
+                "isPast": true
+            }
+        ]
+    }`)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
