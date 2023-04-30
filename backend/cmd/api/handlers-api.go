@@ -10,7 +10,7 @@ const YYYYMMDD = "2006-01-02"
 
 type dateTimeListRequestPayload struct {
 	StartDate   string `json:"dateTime"`
-	ServiceType string `json:"serviceType"`
+	ServiceType string `json:"priceRequest.ServiceType"`
 	VehicleType string `json:"vehicleType"`
 }
 
@@ -270,6 +270,99 @@ func (app *application) DateTimeList(w http.ResponseWriter, r *http.Request) {
             }
         ]
     }`)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
+}
+
+type priceRequestPayload struct {
+	VehicleType string `json:"vehicleType"`
+	ServiceType string `json:"ServiceType"`
+}
+
+func (app *application) Price(w http.ResponseWriter, r *http.Request) {
+	var priceRequest priceRequestPayload
+
+	err := json.NewDecoder(r.Body).Decode(&priceRequest)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	// validate data
+
+	price := "0"
+
+	if priceRequest.VehicleType == "Sedan" && priceRequest.ServiceType == "Show Room" {
+		price = "140"
+	} else if priceRequest.VehicleType == "SUV" && priceRequest.ServiceType == "Show Room" {
+		price = "160"
+	} else if priceRequest.VehicleType == "Large SUV / Truck" && priceRequest.ServiceType == "Show Room" {
+		price = "170"
+	} else if priceRequest.VehicleType == "Motorcycle" && priceRequest.ServiceType == "Show Room" {
+		price = "100"
+	} else if priceRequest.VehicleType == "Sedan" && priceRequest.ServiceType == "Basic" {
+		price = "240"
+	} else if priceRequest.VehicleType == "SUV" && priceRequest.ServiceType == "Basic" {
+		price = "260"
+	} else if priceRequest.VehicleType == "Large SUV / Truck" && priceRequest.ServiceType == "Basic" {
+		price = "270"
+	} else if priceRequest.VehicleType == "Motorcycle" && priceRequest.ServiceType == "Basic" {
+		price = "200"
+	} else if priceRequest.VehicleType == "Sedan" && priceRequest.ServiceType == "Interior" {
+		price = "340"
+	} else if priceRequest.VehicleType == "SUV" && priceRequest.ServiceType == "Interior" {
+		price = "360"
+	} else if priceRequest.VehicleType == "Large SUV / Truck" && priceRequest.ServiceType == "Interior" {
+		price = "370"
+	} else if priceRequest.VehicleType == "Motorcycle" && priceRequest.ServiceType == "Interior" {
+		price = "300"
+	} else if priceRequest.VehicleType == "Sedan" && priceRequest.ServiceType == "Exterior" {
+		price = "440"
+	} else if priceRequest.VehicleType == "SUV" && priceRequest.ServiceType == "Exterior" {
+		price = "460"
+	} else if priceRequest.VehicleType == "Large SUV / Truck" && priceRequest.ServiceType == "Exterior" {
+		price = "470"
+	} else if priceRequest.VehicleType == "Motorcycle" && priceRequest.ServiceType == "Exterior" {
+		price = "400"
+	}
+
+	out := []byte(price)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
+}
+
+type invoiceRequestPayload struct {
+	VehicleType string `json:"vehicleType"`
+	ServiceType string `json:"ServiceType"`
+	Time        string `json:"time"`
+}
+
+func (app *application) Invoice(w http.ResponseWriter, r *http.Request) {
+	var invoiceRequest invoiceRequestPayload
+
+	err := json.NewDecoder(r.Body).Decode(&invoiceRequest)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	// validate data
+
+	out := []byte(`{
+		"Transaction Number": "13",
+		"Bill Number": "37",
+		"Type of Service": "Show Room",
+		"Vehicle Type": "Sedan",
+		"Date": "14 Mar 2023",
+		"Time": "15:00",
+		"Service Cost": "169.00 $",
+		"Discount": "Not Specified",
+		"Total": "169.00 $",
+		"Deposit": "30.00 $",
+		"Remaining": "139.00 $"
+	}`)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
