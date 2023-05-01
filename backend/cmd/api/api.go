@@ -6,6 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 const version = "1.0.0"
@@ -13,6 +16,10 @@ const version = "1.0.0"
 type config struct {
 	port int
 	env  string
+	db   struct {
+		dsn string
+	}
+	orm *gorm.DB
 }
 
 type application struct {
@@ -34,19 +41,25 @@ func (app *application) serve() error {
 }
 
 func main() {
-	app := makeApp()
+	app, err := makeApp()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	err := app.serve()
+	err = app.serve()
 	if err != nil {
 		app.errorLog.Fatal(err)
 	}
 }
 
-func makeApp() *application {
-	cfg := makeConfig()
-
+func makeApp() (*application, error) {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	cfg, err := makeConfig()
+	if err != nil {
+		return nil, err
+	}
 
 	app := &application{
 		config:   cfg,
@@ -55,16 +68,24 @@ func makeApp() *application {
 		version:  version,
 	}
 
-	return app
+	return app, nil
 }
 
-func makeConfig() config {
+func makeConfig() (config, error) {
 	var cfg config
 
 	flag.IntVar(&cfg.port, "port", 4001, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|production)")
+	flag.StringVar(&cfg.db.dsn, "dsn", "root:password@/booking?parseTime=true&tls=false", "MySQL DSN")
 
 	flag.Parse()
 
-	return cfg
+	orm, err := gorm.Open(mysql.Open(cfg.db.dsn), &gorm.Config{})
+	if err != nil {
+		return cfg, err
+	}
+
+	cfg.orm = orm
+
+	return cfg, nil
 }
