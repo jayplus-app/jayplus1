@@ -10,7 +10,7 @@ const YYYYMMDD = "2006-01-02"
 
 type dateTimeListRequestPayload struct {
 	StartDate   string `json:"dateTime"`
-	ServiceType string `json:"priceRequest.ServiceType"`
+	ServiceType string `json:"serviceType"`
 	VehicleType string `json:"vehicleType"`
 }
 
@@ -277,7 +277,7 @@ func (app *application) DateTimeList(w http.ResponseWriter, r *http.Request) {
 
 type priceRequestPayload struct {
 	VehicleType string `json:"vehicleType"`
-	ServiceType string `json:"ServiceType"`
+	ServiceType string `json:"serviceType"`
 }
 
 func (app *application) Price(w http.ResponseWriter, r *http.Request) {
@@ -335,7 +335,7 @@ func (app *application) Price(w http.ResponseWriter, r *http.Request) {
 
 type invoiceRequestPayload struct {
 	VehicleType string `json:"vehicleType"`
-	ServiceType string `json:"ServiceType"`
+	ServiceType string `json:"serviceType"`
 	Time        string `json:"time"`
 }
 
