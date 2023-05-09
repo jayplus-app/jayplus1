@@ -3,12 +3,11 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/jayplus-app/jayplus/internal/driver/models"
 )
-
-const YYYYMMDD = "2006-01-02"
 
 type dateTimeListRequestPayload struct {
 	StartDate   string `json:"dateTime"`
@@ -73,7 +72,7 @@ func (app *application) DateTimeList(w http.ResponseWriter, r *http.Request) {
 
 	// validate data
 
-	d, err := time.Parse(YYYYMMDD, input.StartDate)
+	d, err := time.Parse(time.DateOnly, input.StartDate)
 	if err != nil {
 		app.errorLog.Println(err)
 		w.Write([]byte(`{"success": false, "message": "Invalid date format"}`))
@@ -91,7 +90,7 @@ func (app *application) DateTimeList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	out, err := json.Marshal(map[string][]models.Timeslot{
-		d.Format(YYYYMMDD): timeslots,
+		d.Format(time.DateOnly): timeslots,
 	})
 	if err != nil {
 		app.errorLog.Println(err)
@@ -105,56 +104,35 @@ func (app *application) DateTimeList(w http.ResponseWriter, r *http.Request) {
 type priceRequestPayload struct {
 	VehicleType string `json:"vehicleType"`
 	ServiceType string `json:"serviceType"`
+	Time        string `json:"time"`
 }
 
 func (app *application) Price(w http.ResponseWriter, r *http.Request) {
-	var priceRequest priceRequestPayload
+	var input priceRequestPayload
 
-	err := json.NewDecoder(r.Body).Decode(&priceRequest)
+	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
 		app.errorLog.Println(err)
 		return
 	}
 
-	// validate data
+	// TODO: [THREAD:4] Validate input
 
-	price := "0"
-
-	if priceRequest.VehicleType == "Sedan" && priceRequest.ServiceType == "Show Room" {
-		price = "140"
-	} else if priceRequest.VehicleType == "SUV" && priceRequest.ServiceType == "Show Room" {
-		price = "160"
-	} else if priceRequest.VehicleType == "Large SUV / Truck" && priceRequest.ServiceType == "Show Room" {
-		price = "170"
-	} else if priceRequest.VehicleType == "Motorcycle" && priceRequest.ServiceType == "Show Room" {
-		price = "100"
-	} else if priceRequest.VehicleType == "Sedan" && priceRequest.ServiceType == "Basic" {
-		price = "240"
-	} else if priceRequest.VehicleType == "SUV" && priceRequest.ServiceType == "Basic" {
-		price = "260"
-	} else if priceRequest.VehicleType == "Large SUV / Truck" && priceRequest.ServiceType == "Basic" {
-		price = "270"
-	} else if priceRequest.VehicleType == "Motorcycle" && priceRequest.ServiceType == "Basic" {
-		price = "200"
-	} else if priceRequest.VehicleType == "Sedan" && priceRequest.ServiceType == "Interior" {
-		price = "340"
-	} else if priceRequest.VehicleType == "SUV" && priceRequest.ServiceType == "Interior" {
-		price = "360"
-	} else if priceRequest.VehicleType == "Large SUV / Truck" && priceRequest.ServiceType == "Interior" {
-		price = "370"
-	} else if priceRequest.VehicleType == "Motorcycle" && priceRequest.ServiceType == "Interior" {
-		price = "300"
-	} else if priceRequest.VehicleType == "Sedan" && priceRequest.ServiceType == "Exterior" {
-		price = "440"
-	} else if priceRequest.VehicleType == "SUV" && priceRequest.ServiceType == "Exterior" {
-		price = "460"
-	} else if priceRequest.VehicleType == "Large SUV / Truck" && priceRequest.ServiceType == "Exterior" {
-		price = "470"
-	} else if priceRequest.VehicleType == "Motorcycle" && priceRequest.ServiceType == "Exterior" {
-		price = "400"
+	d, err := time.Parse(time.DateTime, input.Time)
+	if err != nil {
+		app.errorLog.Println(err)
+		w.Write([]byte(`{"success": false, "message": "Invalid date format"}`))
+		return
 	}
 
-	out := []byte(price)
+	price, err := app.db.GetPrice(input.ServiceType, input.VehicleType, d)
+	if err != nil {
+		app.errorLog.Println(err)
+		w.Write([]byte(`{"success": false, "message": "Invalid input"}`))
+		return
+	}
+
+	out := []byte(strconv.FormatFloat(float64(price), 'f', 2, 64))
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -138,6 +139,41 @@ func (m *Models) GetTimeframes(serviceType string, vehicleype string, date time.
 	}
 
 	return timeslots, nil
+}
+
+func (m *Models) GetPrice(serviceType string, vehicleType string, startTime time.Time) (float32, error) {
+	d := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 0, 0, 0, 0, startTime.Location())
+
+	timeslots, err := m.GetTimeframes(serviceType, vehicleType, d)
+	if err != nil {
+		return 0, err
+	}
+
+	var timeslot Timeslot
+
+	for _, t := range timeslots {
+		if t.Start.Equal(startTime) {
+			timeslot = t
+			break
+		}
+	}
+
+	if timeslot.Start.IsZero() {
+		return 0, errors.New("timeslot not found")
+	}
+
+	if !timeslot.Available {
+		log.Printf("Timeslot: %+v\n", timeslot)
+		return 0, errors.New("timeslot not available")
+	}
+
+	var svc Service
+	err = m.db.Where("service_type = ? AND vehicle_type = ?", serviceType, vehicleType).First(&svc).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return svc.Price, nil
 }
 
 type Timeslot struct {
