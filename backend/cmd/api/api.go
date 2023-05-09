@@ -7,8 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+	. "github.com/jayplus-app/jayplus/internal/driver/models"
 )
 
 const version = "1.0.0"
@@ -16,10 +15,7 @@ const version = "1.0.0"
 type config struct {
 	port int
 	env  string
-	db   struct {
-		dsn string
-	}
-	orm *gorm.DB
+	db   DBConfig
 }
 
 type application struct {
@@ -27,6 +23,7 @@ type application struct {
 	infoLog  *log.Logger
 	errorLog *log.Logger
 	version  string
+	db       Models
 }
 
 func (app *application) serve() error {
@@ -61,11 +58,17 @@ func makeApp() (*application, error) {
 		return nil, err
 	}
 
+	models, err := NewModels(&cfg.db)
+	if err != nil {
+		return nil, err
+	}
+
 	app := &application{
 		config:   cfg,
 		infoLog:  infoLog,
 		errorLog: errorLog,
 		version:  version,
+		db:       *models,
 	}
 
 	return app, nil
@@ -74,18 +77,15 @@ func makeApp() (*application, error) {
 func makeConfig() (config, error) {
 	var cfg config
 
-	flag.IntVar(&cfg.port, "port", 4001, "API server port")
+	flag.IntVar(&cfg.port, "port", 4001, "API server port") // TODO: [THREAD:3] Read port from env
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|production)")
-	flag.StringVar(&cfg.db.dsn, "dsn", "root:password@/booking?parseTime=true&tls=false", "MySQL DSN")
+	flag.StringVar(&cfg.db.User, "dbuser", "root", "MySQL User")        // TODO: [THREAD:3] Read dbuser from env
+	flag.StringVar(&cfg.db.Pass, "dbpass", "", "MySQL Password")        // TODO: [THREAD:3] Read dbpass from env
+	flag.StringVar(&cfg.db.Host, "dbhost", "localhost", "MySQL Host")   // TODO: [THREAD:3] Read dbhost from env
+	flag.IntVar(&cfg.db.Port, "dbport", 3306, "MySQL Port")             // TODO: [THREAD:3] Read dbport from env
+	flag.StringVar(&cfg.db.Name, "dbname", "jayplus", "MySQL Database") // TODO: [THREAD:3] Read dbname from env
 
 	flag.Parse()
-
-	orm, err := gorm.Open(mysql.Open(cfg.db.dsn), &gorm.Config{})
-	if err != nil {
-		return cfg, err
-	}
-
-	cfg.orm = orm
 
 	return cfg, nil
 }
