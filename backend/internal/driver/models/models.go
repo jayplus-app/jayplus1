@@ -48,7 +48,7 @@ func NewModels(config *DBConfig) (*Models, error) {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&User{}, &Service{}, &Booking{})
+	err = db.AutoMigrate(&User{}, &Defintion{}, &Service{}, &Booking{})
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (m *Models) GetTimeframes(serviceType string, vehicleype string, date time.
 	receptionStart := date.Add(time.Hour * 9)                      // TODO: [THREAD:3] Read from config
 	receptionEnd := date.Add(time.Hour * 17).Add(time.Minute * 30) // TODO: [THREAD:3] Read from config
 	start := receptionStart
-	end := receptionStart.Add(time.Duration(timeslotMinutes))
+	end := start.Add(time.Duration(timeslotMinutes) * time.Minute)
 
 	// Retrieve booked timeslots within the day
 	bookings := m.ModelsBookingsByDate(date.In(dbTimezone), date.Add(time.Hour*24).In(dbTimezone))
@@ -133,8 +133,8 @@ func (m *Models) GetTimeframes(serviceType string, vehicleype string, date time.
 
 		timeslots = append(timeslots, timeslot)
 
-		receptionStart = end
-		end = receptionStart.Add(time.Duration(timeslotMinutes))
+		start = end
+		end = start.Add(time.Duration(timeslotMinutes) * time.Minute)
 	}
 
 	return timeslots, nil
