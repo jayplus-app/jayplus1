@@ -79,11 +79,11 @@ func makeConfig() (config, error) {
 
 	flag.IntVar(&cfg.port, "port", 4001, "API server port") // TODO: [THREAD:3] Read port from env
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|production)")
-	flag.StringVar(&cfg.db.User, "dbuser", "root", "MySQL User")        // TODO: [THREAD:3] Read dbuser from env
-	flag.StringVar(&cfg.db.Pass, "dbpass", "", "MySQL Password")        // TODO: [THREAD:3] Read dbpass from env
-	flag.StringVar(&cfg.db.Host, "dbhost", "localhost", "MySQL Host")   // TODO: [THREAD:3] Read dbhost from env
-	flag.IntVar(&cfg.db.Port, "dbport", 3306, "MySQL Port")             // TODO: [THREAD:3] Read dbport from env
-	flag.StringVar(&cfg.db.Name, "dbname", "jayplus", "MySQL Database") // TODO: [THREAD:3] Read dbname from env
+	flag.StringVar(&cfg.db.User, "dbuser", "dev", "MySQL User")            // TODO: [THREAD:3] Read dbuser from env
+	flag.StringVar(&cfg.db.Pass, "dbpass", "secret", "MySQL Password")     // TODO: [THREAD:3] Read dbpass from env
+	flag.StringVar(&cfg.db.Host, "dbhost", "localhost", "MySQL Host")      // TODO: [THREAD:3] Read dbhost from env
+	flag.IntVar(&cfg.db.Port, "dbport", 3306, "MySQL Port")                // TODO: [THREAD:3] Read dbport from env
+	flag.StringVar(&cfg.db.Name, "dbname", "jayplus_go", "MySQL Database") // TODO: [THREAD:3] Read dbname from env
 
 	flag.Parse()
 

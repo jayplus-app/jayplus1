@@ -15,19 +15,68 @@ type dateTimeListRequestPayload struct {
 	VehicleType string `json:"vehicleType"`
 }
 
-func (app *application) VehicleTypes(w http.ResponseWriter, r *http.Request) {
-	out := []byte(`{
-		"name": "vehicle-types",
-		"types": [
-			{"id": "Sedan", "name": "Sedan", "icon": "sedan.svg", "description": "Any 5-seater sedan, any hatchback, any two or mini car"},
-			{"id": "SUV", "name": "SUV", "icon": "suv.svg", "description": "Any 5 seater SUV"}, 
-			{"id": "Large-SUV-Truck", "name": "Large SUV / Truck", "icon": "largeSuvTruck.svg", "description": "Any 6, 7, or 8 seater, minivan or van, pickup truck"},
-			{"id": "Motorcycle", "name": "Motorcycle", "icon": "motorcycle.svg", "description": "Any motorcycle"}
-		]
-	}`)
-
+func (app *application) response(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(out)
+	w.WriteHeader(status)
+	err := json.NewEncoder(w).Encode(data)
+	if err != nil {
+		app.errorLog.Println(err)
+	}
+}
+
+type definitionRequestPayload struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+	Order       int    `json:"order"`
+}
+
+func (app *application) NewVehicleType(w http.ResponseWriter, r *http.Request) {
+	app.newDefinition("vehicle-types", w, r)
+}
+
+func (app *application) NewServiceType(w http.ResponseWriter, r *http.Request) {
+	app.newDefinition("service-types", w, r)
+}
+
+func (app *application) newDefinition(defType string, w http.ResponseWriter, r *http.Request) {
+	var payload definitionRequestPayload
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	def, err := app.db.NewDefinition(defType, payload.Name, payload.Description, payload.Icon, payload.Order)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	app.response(w, http.StatusOK, def)
+}
+
+func (app *application) VehicleTypes(w http.ResponseWriter, r *http.Request) {
+	defType := "vehicle-types"
+
+	list, err := app.db.GetDefinitions(defType)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	out := map[string]interface{}{
+		"name":  defType,
+		"types": list,
+		// [
+		// 	{"id": "Sedan", "name": "Sedan", "icon": "sedan.svg", "description": "Any 5-seater sedan, any hatchback, any two or mini car"},
+		// 	{"id": "SUV", "name": "SUV", "icon": "suv.svg", "description": "Any 5 seater SUV"},
+		// 	{"id": "Large-SUV-Truck", "name": "Large SUV / Truck", "icon": "largeSuvTruck.svg", "description": "Any 6, 7, or 8 seater, minivan or van, pickup truck"},
+		// 	{"id": "Motorcycle", "name": "Motorcycle", "icon": "motorcycle.svg", "description": "Any motorcycle"}
+		// ]
+	}
+
+	app.response(w, http.StatusOK, out)
 }
 
 func (app *application) ServiceTypes(w http.ResponseWriter, r *http.Request) {

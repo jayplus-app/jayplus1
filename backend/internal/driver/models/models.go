@@ -61,6 +61,33 @@ func NewModels(config *DBConfig) (*Models, error) {
 	return models, nil
 }
 
+func (m *Models) NewDefinition(defType string, name string, description string, icon string, order int) (*Defintion, error) {
+	definition := &Defintion{
+		Type:        defType,
+		Name:        name,
+		Description: description,
+		Icon:        icon,
+		Order:       order,
+	}
+
+	err := m.db.Create(definition).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return definition, nil
+}
+
+func (m *Models) GetDefinitions(defType string) ([]Defintion, error) {
+	var definitions []Defintion
+	err := m.db.Order("order").Where("type = ?", defType).Find(&definitions).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return definitions, nil
+}
+
 func (m *Models) GetTimeframes(serviceType string, vehicleype string, date time.Time) ([]Timeslot, error) {
 	dbTimezone, err := time.LoadLocation("UTC")
 	if err != nil {
@@ -287,4 +314,13 @@ func (b Booking) GetBooker() booking.Booker {
 
 func (b Booking) SetBooker(booker booking.Booker) {
 	b.db.Association("Booker").Append(booker)
+}
+
+type Defintion struct {
+	Model
+	Type        string
+	Order       int
+	Name        string `json:"name"`
+	Icon        string `json:"icon"`
+	Description string `json:"description"`
 }
