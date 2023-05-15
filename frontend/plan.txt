@@ -1,0 +1,4 @@
+- Restructure the previous code and create a new one in TypeScript.
+- Use component folders for component.tsx, component.css, and index.ts files.
+- Use services folder for apiCient and httpServices as taught in Mosh course.
+- Use custome hooks in hooks folder for different operations.
