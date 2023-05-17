@@ -56,58 +56,34 @@ func (app *application) newDefinition(defType string, w http.ResponseWriter, r *
 	app.response(w, http.StatusOK, def)
 }
 
-func (app *application) VehicleTypes(w http.ResponseWriter, r *http.Request) {
-	defType := "vehicle-types"
-
+func (app *application) getDefinitions(defType string, w http.ResponseWriter, r *http.Request) error {
 	list, err := app.db.GetDefinitions(defType)
 	if err != nil {
-		app.errorLog.Println(err)
-		return
+		return err
 	}
 
 	out := map[string]interface{}{
 		"name":  defType,
 		"types": list,
-		// [
-		// 	{"id": "Sedan", "name": "Sedan", "icon": "sedan.svg", "description": "Any 5-seater sedan, any hatchback, any two or mini car"},
-		// 	{"id": "SUV", "name": "SUV", "icon": "suv.svg", "description": "Any 5 seater SUV"},
-		// 	{"id": "Large-SUV-Truck", "name": "Large SUV / Truck", "icon": "largeSuvTruck.svg", "description": "Any 6, 7, or 8 seater, minivan or van, pickup truck"},
-		// 	{"id": "Motorcycle", "name": "Motorcycle", "icon": "motorcycle.svg", "description": "Any motorcycle"}
-		// ]
 	}
 
 	app.response(w, http.StatusOK, out)
+
+	return nil
+}
+
+func (app *application) VehicleTypes(w http.ResponseWriter, r *http.Request) {
+	if err := app.getDefinitions("vehicle-types", w, r); err != nil {
+		app.errorLog.Println(err)
+		return
+	}
 }
 
 func (app *application) ServiceTypes(w http.ResponseWriter, r *http.Request) {
-	out := []byte(`{
-		"name" : "service-types",
-		"types": [
-			{
-				"id": "Show-Room",
-				"name": "Show Room",
-				"description": "<div><div className=\"grid grid-cols-2 gap-3\"><ul className=\"list-disc list-inside\"><li>Complete Interior Fine Detail with Shampoo</li><li>Full Steam Cleaning on the Dashboard</li><li>Full Steam Cleaning on seats and Floor</li><li>Vacuum (Including Trunk Compartment)</li><li>Detail all Panels, Surfaces &amp; Compartments, etc.</li><li>Shampoo Clean all Carpeted Areas (Cloth Seats Included)</li><li>Shampoo Clean Leather Seats</li><li>Leather Conditioner if you have leather</li><li>Remove all Salt Stains</li><li>Interior Polish on Dashboard, Doors, and Leather Seats</li><li>Remove &amp; Wash all Rubber Mats / Shampoo &amp; Extract all Carpeted Mats</li><li>Interior Shine on Dashboard, Doors, and Leather Seats</li></ul><ul className=\"list-disc list-inside\"><li>Apply Odor Eliminator</li><li>Final Inspection &amp; Touch Up’s</li><li>Meticulous Foam &amp; Hand Wash</li><li>Full Body Wax</li><li>Remove Brake Dust from Wheels, Clean &amp; Dress Tires</li><li>Full Wax on Tires</li><li>Power Wash &amp; Clean Wheel Wells</li><li>Shampoo Clean and Dress Engine</li><li>Air Dry Entire Vehicle</li><li>Clean Exterior and Interior Glass</li><li>Wipe Down Door Jams</li></ul></div></div>"
-			},
-			{
-				"id" : "Basic", 
-				"name": "Basic", 
-				"description": "<div><div class=\"grid grid-cols-2 gap-3\"><ul class=\"list-disc list-inside\"><li>Vacuum (Including Trunk Compartment)</li><li>Remove &amp; Wash all Rubber Mats</li><li>Wipe All Over The dashboard</li></ul><ul class=\"list-disc list-inside\"><li>Power Wash Body and Windows</li><li>Power Wash &amp; Clean Wheel Wells</li></ul></div></div>"
-			},
-			{
-				"id" : "Interior", 
-				"name": "Interior", 
-				"description": "<div><div class=\"grid grid-cols-2 gap-3\"><ul class=\"list-disc list-inside\"><li>Complete Interior Fine Detail with Shampoo</li><li>Full Steam Cleaning on the Dashboard</li><li>Full Steam Cleaning on seats and Floor</li><li>Vacuum (Including Trunk Compartment)</li><li>Detail all Panels, Surfaces &amp; Compartments, etc.</li><li>Shampoo Clean all Carpeted Areas (Cloth Seats Included)</li><li>Shampoo Clean Leather Seats</li></ul><ul class=\"list-disc list-inside\"><li>Leather Conditioner</li><li>Remove all Salt Stains</li><li>Interior Polish on Dashboard, Doors, and Leather Seats</li><li>Remove &amp; Wash all Rubber Mats / Shampoo &amp; Extract all Carpeted Mats</li><li>Interior Shine on Dashboard, Doors, and Leather Seats</li><li>Apply Odor Eliminator</li><li>Final Inspection &amp; Touch Up</li></ul></div></div>"
-			},
-			{
-				"id" : "Exterior", 
-				"name": "Exterior", 
-				"description": "<div><div class=\"grid grid-cols-2 gap-3\"><ul class=\"list-disc list-inside\"><li>Meticulous Foam &amp; Hand Wash</li><li>Remove Brake Dust from Wheels, Clean &amp; Dress Tires</li><li>Power Wash &amp; Clean Wheel Wells</li></ul><ul class=\"list-disc list-inside\"><li>Shampoo Clean and Dress Engine</li><li>Air Dry Entire Vehicle</li><li>Clean Windows</li><li>Wipe Down Door Jams</li></ul></div></div>"
-			}
-		]
-	}`)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(out)
+	if err := app.getDefinitions("service-types", w, r); err != nil {
+		app.errorLog.Println(err)
+		return
+	}
 }
 
 func (app *application) DateTimeList(w http.ResponseWriter, r *http.Request) {
