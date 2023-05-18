@@ -340,7 +340,7 @@ func (m *Models) MakeBooking(vehicleType string, serviceType string, bookTime ti
 		return nil, err
 	}
 
-	deposit := float32(20) // TODO: [THREAD:3] Read from config
+	deposit := float32(25) // TODO: [THREAD:3] Read from config
 
 	booking := Booking{
 		BookedAt:         bookTime,
