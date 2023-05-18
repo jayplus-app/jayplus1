@@ -12,4 +12,5 @@ require (
 require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/stripe/stripe-go/v74 v74.18.0 // indirect
 )

@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/jayplus-app/jayplus/internal/driver/models"
+	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v74/paymentintent"
 )
 
 type dateTimeListRequestPayload struct {
@@ -18,8 +20,8 @@ type dateTimeListRequestPayload struct {
 func (app *application) response(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	err := json.NewEncoder(w).Encode(data)
-	if err != nil {
+
+	if err := json.NewEncoder(w).Encode(data); err != nil {
 		app.errorLog.Println(err)
 	}
 }
@@ -127,9 +129,9 @@ func (app *application) DateTimeList(w http.ResponseWriter, r *http.Request) {
 }
 
 type priceRequestPayload struct {
-	VehicleType string `json:"vehicleType"`
-	ServiceType string `json:"serviceType"`
-	Time        string `json:"time"`
+	VehicleType string    `json:"vehicleType"`
+	ServiceType string    `json:"serviceType"`
+	Time        time.Time `json:"time"`
 }
 
 func (app *application) Price(w http.ResponseWriter, r *http.Request) {
@@ -143,14 +145,7 @@ func (app *application) Price(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: [THREAD:4] Validate input
 
-	d, err := time.Parse(time.DateTime, input.Time)
-	if err != nil {
-		app.errorLog.Println(err)
-		w.Write([]byte(`{"success": false, "message": "Invalid date format"}`))
-		return
-	}
-
-	price, err := app.db.GetPrice(input.ServiceType, input.VehicleType, d)
+	price, err := app.db.GetPrice(input.ServiceType, input.VehicleType, input.Time)
 	if err != nil {
 		app.errorLog.Println(err)
 		w.Write([]byte(`{"success": false, "message": "Invalid input"}`))
@@ -164,15 +159,20 @@ func (app *application) Price(w http.ResponseWriter, r *http.Request) {
 }
 
 type invoiceRequestPayload struct {
-	VehicleType string `json:"vehicleType"`
-	ServiceType string `json:"serviceType"`
-	Time        string `json:"time"`
+	VehicleType string    `json:"vehicleType"`
+	ServiceType string    `json:"serviceType"`
+	Time        time.Time `json:"time"`
 }
 
 func (app *application) Invoice(w http.ResponseWriter, r *http.Request) {
-	var invoiceRequest invoiceRequestPayload
+	var input invoiceRequestPayload
 
-	err := json.NewDecoder(r.Body).Decode(&invoiceRequest)
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	booking, err := app.db.MakeBooking(input.VehicleType, input.ServiceType, input.Time)
 	if err != nil {
 		app.errorLog.Println(err)
 		return
@@ -180,20 +180,66 @@ func (app *application) Invoice(w http.ResponseWriter, r *http.Request) {
 
 	// validate data
 
-	out := []byte(`{
-		"Transaction Number": "13",
-		"Bill Number": "37",
-		"Type of Service": "Show Room",
-		"Vehicle Type": "Sedan",
-		"Date": "14 Mar 2023",
-		"Time": "15:00",
-		"Service Cost": "169.00 $",
-		"Discount": "Not Specified",
-		"Total": "169.00 $",
-		"Deposit": "30.00 $",
-		"Remaining": "139.00 $"
-	}`)
+	// out := []byte(`{
+	// 	"Transaction Number": "13",
+	// 	"Bill Number": "37",
+	// 	"Type of Service": "Show Room",
+	// 	"Vehicle Type": "Sedan",
+	// 	"Date": "14 Mar 2023",
+	// 	"Time": "15:00",
+	// 	"Service Cost": "169.00 $",
+	// 	"Discount": "Not Specified",
+	// 	"Total": "169.00 $",
+	// 	"Deposit": "30.00 $",
+	// 	"Remaining": "139.00 $"
+	// }`)
+
+	out, err := json.Marshal(booking)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
+}
+
+type payInvoiceRequestPayload struct {
+	BillNumber int `json:"billNumber"`
+}
+
+func (app *application) PayInvoice(w http.ResponseWriter, r *http.Request) {
+	var input payInvoiceRequestPayload
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	booking, err := app.db.GetBooking(input.BillNumber)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	// Create a PaymentIntent with amount and currency
+	params := &stripe.PaymentIntentParams{
+		Amount:   stripe.Int64(int64(booking.Deposit * 100)),
+		Currency: stripe.String(string(stripe.CurrencyCAD)),
+		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
+			Enabled: stripe.Bool(true),
+		},
+	}
+
+	pi, err := paymentintent.New(params)
+	app.infoLog.Printf("pi.New: %v", pi.ClientSecret)
+
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	result := struct {
+		ClientSecret string `json:"clientSecret"`
+	}{
+		ClientSecret: pi.ClientSecret,
+	}
+
+	app.response(w, http.StatusOK, result)
 }

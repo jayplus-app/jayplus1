@@ -14,6 +14,7 @@ func (app *application) routes() http.Handler {
 	mux.Post("/api/v1.0/booking/date-time-list", app.DateTimeList)
 	mux.Post("/api/v1.0/booking/price", app.Price)
 	mux.Post("/api/v1.0/booking/invoice", app.Invoice)
+	mux.Post("/api/v1.0/booking/pay-invoice", app.PayInvoice)
 
 	mux.Post("/api/v1.0/admin/vehicles", app.NewVehicleType)
 	mux.Post("/api/v1.0/admin/services", app.NewServiceType)

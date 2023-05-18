@@ -80,7 +80,7 @@ func (m *Models) NewDefinition(defType string, name string, description string, 
 
 func (m *Models) GetDefinitions(defType string) ([]Defintion, error) {
 	var definitions []Defintion
-	err := m.db.Order("order").Where("type = ?", defType).Find(&definitions).Error
+	err := m.db.Order("`order`").Where("type = ?", defType).Find(&definitions).Error
 	if err != nil {
 		return nil, err
 	}
@@ -276,14 +276,23 @@ func (s Service) GetDuration() time.Duration {
 // Booking is the type for booking model
 type Booking struct {
 	Model
-	BookedAt         time.Time
-	BookedUntil      time.Time
-	CancelledAt      time.Time
-	BookerID         int
-	BookerType       string
-	BookableID       int
-	BookableType     string
-	EstimatedMinutes int
+	ID                uint      `gorm:"primarykey" json:"billNumber"`
+	BookedAt          time.Time `json:"time"`
+	BookedUntil       time.Time
+	CancelledAt       time.Time
+	BookerID          int
+	BookerType        string
+	BookableID        int
+	BookableType      string
+	EstimatedMinutes  int
+	TransactionNumber int     `json:"transactionNumber"`
+	ServiceType       string  `json:"serviceType"`
+	VehicleType       string  `json:"vehicleType"`
+	ServiceCost       float32 `json:"serviceCost"`
+	Discount          float32 `json:"discount"`
+	Total             float32 `json:"total"`
+	Deposit           float32 `json:"deposit"`
+	Remaining         float32 `json:"remaining"`
 }
 
 // Implement the Booking interface for Booking
@@ -323,4 +332,39 @@ type Defintion struct {
 	Name        string `json:"name"`
 	Icon        string `json:"icon"`
 	Description string `json:"description"`
+}
+
+func (m *Models) MakeBooking(vehicleType string, serviceType string, bookTime time.Time) (*Booking, error) {
+	var svc Service
+	if err := m.db.First(&svc, "vehicle_type = ? AND service_type = ?", vehicleType, serviceType).Error; err != nil {
+		return nil, err
+	}
+
+	deposit := float32(20) // TODO: [THREAD:3] Read from config
+
+	booking := Booking{
+		BookedAt:         bookTime,
+		BookedUntil:      bookTime.Add(time.Duration(svc.DurationMinutes) * time.Minute),
+		ServiceType:      svc.ServiceType,
+		VehicleType:      svc.VehicleType,
+		EstimatedMinutes: svc.DurationMinutes,
+		ServiceCost:      svc.Price,
+		Discount:         0,
+		Total:            svc.Price,
+		Deposit:          deposit,
+		Remaining:        svc.Price - deposit,
+	}
+
+	m.db.Create(&booking)
+
+	return &booking, nil
+}
+
+func (m *Models) GetBooking(id int) (*Booking, error) {
+	var booking Booking
+	if err := m.db.First(&booking, id).Error; err != nil {
+		return nil, err
+	}
+
+	return &booking, nil
 }
