@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/jayplus-app/jayplus/internal/driver/models"
 	"github.com/stripe/stripe-go/v74"
 	"github.com/stripe/stripe-go/v74/paymentintent"
+	"github.com/stripe/stripe-go/v74/webhook"
 )
 
 type dateTimeListRequestPayload struct {
@@ -242,4 +244,92 @@ func (app *application) PayInvoice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.response(w, http.StatusOK, result)
+}
+
+func (app *application) StripeWebhook(w http.ResponseWriter, r *http.Request) {
+	const MaxBodyBytes = int64(65536)
+	r.Body = http.MaxBytesReader(w, r.Body, MaxBodyBytes)
+	payload, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		app.errorLog.Printf("Error reading request body: %v\n", err)
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	event := stripe.Event{}
+
+	if err := json.Unmarshal(payload, &event); err != nil {
+		app.errorLog.Printf("⚠️  Webhook error while parsing basic request. %v\n", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Replace this endpoint secret with your endpoint's unique secret
+	// If you are testing with the CLI, find the secret by running 'stripe listen'
+	// If you are using an endpoint defined with the API or dashboard, look in your webhook settings
+	// at https://dashboard.stripe.com/webhooks
+	signatureHeader := r.Header.Get("Stripe-Signature")
+	event, err = webhook.ConstructEvent(payload, signatureHeader, app.config.StripeWHSecret)
+	if err != nil {
+		app.errorLog.Printf("⚠️  Webhook signature verification failed. %v\n", err)
+		w.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+		return
+	}
+	// Unmarshal the event data into an appropriate struct depending on its Type
+	switch event.Type {
+	case "payment_intent.succeeded":
+		var paymentIntent stripe.PaymentIntent
+		err := json.Unmarshal(event.Data.Raw, &paymentIntent)
+		if err != nil {
+			app.errorLog.Printf("Error parsing webhook JSON: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		app.infoLog.Printf("Successful payment for %d.", paymentIntent.Amount)
+		if err := app.handlePaymentIntentSucceeded(paymentIntent); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	case "payment_method.attached":
+		var paymentMethod stripe.PaymentMethod
+		err := json.Unmarshal(event.Data.Raw, &paymentMethod)
+		if err != nil {
+			app.errorLog.Printf("Error parsing webhook JSON: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		// Then define and call a func to handle the successful attachment of a PaymentMethod.
+		// handlePaymentMethodAttached(paymentMethod)
+	default:
+		app.errorLog.Printf("Unhandled event type: %s\n", event.Type)
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (app *application) handlePaymentIntentSucceeded(paymentIntent stripe.PaymentIntent) error {
+	app.infoLog.Printf("💰 Payment received! %v\n", paymentIntent.ID)
+	bookingID, err := strconv.Atoi(paymentIntent.Metadata["billNumber"])
+	if err != nil {
+		metadata, err := json.Marshal(paymentIntent.Metadata)
+		if err != nil {
+			metadata = []byte("invalid metadata")
+		}
+
+		app.errorLog.Printf("Failed to update booking status on payment success [metadata: %v] [err: %v]\n", metadata, err)
+		return err
+	}
+
+	data := map[string]string{
+		"payed_at": time.Now().Format(time.RFC3339),
+	}
+
+	if err := app.db.UpdateBooking(bookingID, data); err != nil {
+		if err.Error() == "no rows affected" {
+			app.errorLog.Printf("Failed to update booking status on payment success [booking_id: %v] [err: %v]\n", bookingID, err)
+			return err
+		}
+	}
+
+	return nil
 }

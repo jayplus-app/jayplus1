@@ -14,9 +14,10 @@ import (
 const version = "1.0.0"
 
 type config struct {
-	port int
-	env  string
-	db   DBConfig
+	port           int
+	env            string
+	db             DBConfig
+	StripeWHSecret string
 }
 
 type application struct {
@@ -86,6 +87,7 @@ func makeConfig() (config, error) {
 	flag.IntVar(&cfg.db.Port, "dbport", 3306, "MySQL Port")                                    // TODO: [THREAD:3] Read dbport from env
 	flag.StringVar(&cfg.db.Name, "dbname", "jayplus_go", "MySQL Database")                     // TODO: [THREAD:3] Read dbname from env
 	flag.StringVar(&stripe.Key, "stripekey", "sk_test_4eC39HqLyjWDarjtT1zdp7dc", "Stripe Key") // TODO: [THREAD:3] Read stripekey from env
+	flag.StringVar(&cfg.StripeWHSecret, "stripewhsec", "whsec_...", "Stripe Webhook Secret")   // TODO: [THREAD:3] Read stripekey from env
 
 	flag.Parse()
 

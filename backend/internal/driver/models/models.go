@@ -293,6 +293,7 @@ type Booking struct {
 	Total             float32 `json:"total"`
 	Deposit           float32 `json:"deposit"`
 	Remaining         float32 `json:"remaining"`
+	PayedAt           time.Time
 }
 
 // Implement the Booking interface for Booking
@@ -367,4 +368,16 @@ func (m *Models) GetBooking(id int) (*Booking, error) {
 	}
 
 	return &booking, nil
+}
+
+func (m *Models) UpdateBooking(id int, data map[string]string) error {
+	var b Booking
+	res := m.db.Model(&b).Where("id = ?", id).Updates(data)
+	if res.Error != nil {
+		return res.Error
+	} else if res.RowsAffected == 0 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
 }

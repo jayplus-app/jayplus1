@@ -19,5 +19,7 @@ func (app *application) routes() http.Handler {
 	mux.Post("/api/v1.0/admin/vehicles", app.NewVehicleType)
 	mux.Post("/api/v1.0/admin/services", app.NewServiceType)
 
+	mux.Post("/stripe/webhook/just-to-make-it-hard-to-guess", app.StripeWebhook)
+
 	return mux
 }
