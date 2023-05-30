@@ -1,0 +1,1 @@
+<img class="inline-block" src="{{ asset('images/jayPlusLogo.svg') }}" alt="{{ config('app.name') }}">
