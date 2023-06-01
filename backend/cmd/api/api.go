@@ -30,7 +30,7 @@ type application struct {
 	errorLog *log.Logger
 	version  string
 	db       Models
-	msgGW    *messaging.Gateway
+	msgGW    messaging.Gateway
 }
 
 func (app *application) serve() error {

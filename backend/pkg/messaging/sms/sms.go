@@ -8,6 +8,6 @@ type Twillio struct {
 }
 
 // Send sends an SMS using Twillio (Implement SMSGW interface)
-func (t *Twillio) Send(sms messaging.Message) error {
+func (t Twillio) Send(sms *messaging.Message) error {
 	return nil
 }

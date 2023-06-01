@@ -2,12 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/jayplus-app/jayplus/internal/driver/models"
+	"github.com/jayplus-app/jayplus/pkg/messaging"
 	"github.com/stripe/stripe-go/v74"
 	"github.com/stripe/stripe-go/v74/paymentintent"
 	"github.com/stripe/stripe-go/v74/webhook"
@@ -329,6 +331,18 @@ func (app *application) handlePaymentIntentSucceeded(paymentIntent stripe.Paymen
 			app.errorLog.Printf("Failed to update booking status on payment success [booking_id: %v] [err: %v]\n", bookingID, err)
 			return err
 		}
+	}
+
+	if defs, err := app.db.GetDefinitions("sms.payment.success"); err == nil {
+		tpl := defs[0].Description // "Successfull Payment\nBill No.: %d"
+
+		sms := &messaging.Message{
+			Body: fmt.Sprintf(tpl, bookingID), // TODO: R
+		}
+
+		app.msgGW.Send(sms)
+	} else {
+		app.errorLog.Printf("Failed to find sms template on payment success [booking_id: %v] [err: %v]\n", bookingID, err)
 	}
 
 	return nil

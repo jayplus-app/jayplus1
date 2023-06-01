@@ -6,6 +6,6 @@ type Message struct {
 	Recipients []string
 }
 
-type Gateway *interface {
-	Send(Message) error
+type Gateway interface {
+	Send(*Message) error
 }
