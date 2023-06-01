@@ -8,6 +8,8 @@ import (
 	"os"
 
 	. "github.com/jayplus-app/jayplus/internal/driver/models"
+	"github.com/jayplus-app/jayplus/pkg/messaging"
+	"github.com/jayplus-app/jayplus/pkg/messaging/sms"
 	"github.com/stripe/stripe-go/v74"
 )
 
@@ -18,6 +20,8 @@ type config struct {
 	env            string
 	db             DBConfig
 	StripeWHSecret string
+	TwillioSID     string
+	TwillioToken   string
 }
 
 type application struct {
@@ -26,6 +30,7 @@ type application struct {
 	errorLog *log.Logger
 	version  string
 	db       Models
+	msgGW    *messaging.Gateway
 }
 
 func (app *application) serve() error {
@@ -65,12 +70,18 @@ func makeApp() (*application, error) {
 		return nil, err
 	}
 
+	smsGw := &sms.Twillio{
+		SID:   cfg.TwillioSID,
+		Token: cfg.TwillioToken,
+	}
+
 	app := &application{
 		config:   cfg,
 		infoLog:  infoLog,
 		errorLog: errorLog,
 		version:  version,
 		db:       *models,
+		msgGW:    smsGw,
 	}
 
 	return app, nil
@@ -88,6 +99,8 @@ func makeConfig() (config, error) {
 	flag.StringVar(&cfg.db.Name, "dbname", "jayplus_go", "MySQL Database")                     // TODO: [THREAD:3] Read dbname from env
 	flag.StringVar(&stripe.Key, "stripekey", "sk_test_4eC39HqLyjWDarjtT1zdp7dc", "Stripe Key") // TODO: [THREAD:3] Read stripekey from env
 	flag.StringVar(&cfg.StripeWHSecret, "stripewhsec", "whsec_...", "Stripe Webhook Secret")   // TODO: [THREAD:3] Read stripekey from env
+	flag.StringVar(&cfg.TwillioSID, "twilliosid", "AC...", "Twillio SID")                      // TODO: [THREAD:3] Read twilliosid from env
+	flag.StringVar(&cfg.TwillioToken, "twilliotoken", "a...", "Twillio Token")                 // TODO: [THREAD:3] Read twilliotoken from env
 
 	flag.Parse()
 
