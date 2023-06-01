@@ -10,7 +10,10 @@ require (
 )
 
 require (
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stripe/stripe-go/v74 v74.18.0 // indirect
+	github.com/twilio/twilio-go v1.7.1 // indirect
 )
