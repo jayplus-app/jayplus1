@@ -7,5 +7,5 @@ type Message struct {
 }
 
 type Gateway interface {
-	Send(*Message) error
+	Send(*Message) map[string]error
 }

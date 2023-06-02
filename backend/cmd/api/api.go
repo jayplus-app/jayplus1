@@ -9,7 +9,7 @@ import (
 
 	. "github.com/jayplus-app/jayplus/internal/driver/models"
 	"github.com/jayplus-app/jayplus/pkg/messaging"
-	"github.com/jayplus-app/jayplus/pkg/messaging/sms"
+	. "github.com/jayplus-app/jayplus/pkg/messaging/sms"
 	"github.com/stripe/stripe-go/v74"
 )
 
@@ -70,10 +70,7 @@ func makeApp() (*application, error) {
 		return nil, err
 	}
 
-	smsGw := &sms.Twillio{
-		SID:   cfg.TwillioSID,
-		Token: cfg.TwillioToken,
-	}
+	smsGw := NewTwillio(cfg.TwillioSID, cfg.TwillioToken, infoLog, errorLog)
 
 	app := &application{
 		config:   cfg,
@@ -81,7 +78,7 @@ func makeApp() (*application, error) {
 		errorLog: errorLog,
 		version:  version,
 		db:       *models,
-		msgGW:    smsGw,
+		msgGW:    *smsGw,
 	}
 
 	return app, nil
