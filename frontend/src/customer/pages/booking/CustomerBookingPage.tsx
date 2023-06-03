@@ -1,12 +1,12 @@
-import ServiceType from '../../components/booking/serviceType/ServiceType'
+import ServiceTypeSelection from '../../components/booking/ServiceTypeSelection/ServiceType'
 import TimeSelection from '../../components/booking/timeSelection/TimeSelection'
-import VehicleType from '../../components/booking/vehicleType/VehicleType'
+import VehicleTypeSelection from '../../components/booking/VehicleTypeSelection/VehicleTypeSelection'
 
 const CustomerBookingPage = () => {
 	return (
 		<div id="customer-booking-page">
-			<VehicleType />
-			<ServiceType />
+			<VehicleTypeSelection />
+			<ServiceTypeSelection />
 			<TimeSelection />
 		</div>
 	)
