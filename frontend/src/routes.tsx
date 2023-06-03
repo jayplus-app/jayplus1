@@ -1,9 +1,9 @@
 import { createBrowserRouter } from 'react-router-dom'
 import CustomerApp from './customer/CustomerApp'
 import AdminApp from './admin/AdminApp'
-import CustomerBookingPage from './customer/pages/CustomerBookingPage'
-import CustomerPaymentPage from './customer/pages/CustomerPaymentPage'
-import CustomerPaymentSuccessPage from './customer/pages/CustomerPaymentSuccessPage'
+import CustomerBookingPage from './customer/pages/booking/CustomerBookingPage'
+import CustomerPaymentPage from './customer/pages/payment/CustomerPaymentPage'
+import CustomerPaymentSuccessPage from './customer/pages/payment/CustomerPaymentSuccessPage'
 
 const router = createBrowserRouter([
 	{
