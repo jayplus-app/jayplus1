@@ -1,14 +1,14 @@
 import TypeList from '../shared/TypeList'
 
-const ServiceType = () => {
+const ServiceTypeSelection = () => {
 	return (
 		<section id="service-type">
 			<div className="w-full">
 				<h3 className="mt-4">Service Type</h3>
-				<TypeList />
+				{/* <TypeList /> */}
 			</div>
 		</section>
 	)
 }
 
-export default ServiceType
+export default ServiceTypeSelection

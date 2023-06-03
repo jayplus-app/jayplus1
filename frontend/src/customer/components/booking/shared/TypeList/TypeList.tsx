@@ -1,4 +1,4 @@
-import { useState, useContext, SetStateAction, ChangeEvent } from 'react'
+import { useState, useContext, ChangeEvent } from 'react'
 import './TypeList.css'
 import CustomerBookingContext from '../../../../context/CustomerBookingContext'
 
