@@ -13,7 +13,7 @@ function calculatePrice(
 interface Type {
 	id: string
 	name: string
-	icon: string
+	icon?: string
 }
 
 interface Types {

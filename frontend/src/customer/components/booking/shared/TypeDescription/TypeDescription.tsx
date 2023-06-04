@@ -1,7 +1,8 @@
+import { ReactNode } from 'react'
 import './TypeDescription.css'
 
 interface TypeDescriptionProps {
-	description: string
+	description: ReactNode
 }
 
 const TypeDescription = ({ description }: TypeDescriptionProps) => {
