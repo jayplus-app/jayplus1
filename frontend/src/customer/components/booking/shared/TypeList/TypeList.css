@@ -1,53 +1,40 @@
-.type-list {
-    /* Add any specific styles for the container here */
-  }
-  
-  .type-list-ul {
-    /* Add any specific styles for the ul element here */
-  }
-  
-  .type-list-li {
-    position: relative;
-    background: #EAF1EF;
-    height: 80px;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 13px; 
-    border: 0px #eee solid;
-    transition: 0.3s;
-  }
-  
-  .type-list-item:hover {
-    position: relative;
-    background: #FFD27A;
-    height: 80px;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 14px;
-    border: 0px #eee solid;
-    transition: 0.3s;
-  }
-  
-  .type-list-input {
-    /* Hide the radio button */
-  }
-  
-  .type-list-label {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 80px;
-    border-radius: 5px;
-    transform: translate(-50%, -50%);
-    cursor: pointer;
-  }
-  
-  .type-list-label-span {
-    /* Add any specific styles for the span here */
-  }
-  
-  .type-list-label-span-small {
-    font-size: 10px;
-  }
-  
+.type-list-li {
+  position: relative;
+  background: #E9ECEF;
+  height: 80px;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 13px; 
+  border: 0px #eee solid;
+  transition: 0.3s;
+}
+
+.type-list-li:hover {
+  position: relative;
+  background: #FFD27A;
+  height: 80px;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  border: 0px #eee solid;
+  transition: 0.3s;
+}
+
+.type-list-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 80px;
+  border-radius: 5px;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.type-list-label-span-small {
+  font-size: 10px;
+}
+
+.type-list-input:checked ~ label {
+  background: #FFD27A;
+}

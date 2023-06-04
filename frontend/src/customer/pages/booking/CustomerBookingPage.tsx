@@ -1,6 +1,6 @@
-import ServiceTypeSelection from '../../components/booking/ServiceTypeSelection/ServiceType'
+import ServiceTypeSelection from '../../components/booking/ServiceTypeSelection'
 import TimeSelection from '../../components/booking/timeSelection/TimeSelection'
-import VehicleTypeSelection from '../../components/booking/VehicleTypeSelection/VehicleTypeSelection'
+import VehicleTypeSelection from '../../components/booking/VehicleTypeSelection'
 
 const CustomerBookingPage = () => {
 	return (
