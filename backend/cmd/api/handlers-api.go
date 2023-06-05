@@ -205,7 +205,8 @@ func (app *application) Invoice(w http.ResponseWriter, r *http.Request) {
 }
 
 type payInvoiceRequestPayload struct {
-	BillNumber int `json:"billNumber"`
+	BillNumber int    `json:"billNumber"`
+	Phone      string `json:"phone"`
 }
 
 func (app *application) PayInvoice(w http.ResponseWriter, r *http.Request) {
@@ -216,10 +217,23 @@ func (app *application) PayInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: Validate phone number
+
 	booking, err := app.db.GetBooking(input.BillNumber)
 	if err != nil {
 		app.errorLog.Println(err)
 		return
+	}
+
+	data := map[string]string{
+		"phone": input.Phone,
+	}
+
+	if err := app.db.UpdateBooker(booking.BookerID, data); err != nil {
+		if err.Error() == "no rows affected" {
+			app.errorLog.Printf("Failed to set booker's phone number on invoice payment request [booking_id: %v] [booker_id: %v] [err: %v]\n", booking.ID, booking.BookerID, err)
+			return
+		}
 	}
 
 	// Create a PaymentIntent with amount and currency
@@ -333,14 +347,31 @@ func (app *application) handlePaymentIntentSucceeded(paymentIntent stripe.Paymen
 		}
 	}
 
+	b, err := app.db.GetBooking(bookingID)
+	if err != nil {
+		app.errorLog.Println(err)
+		return err
+	}
+
 	if defs, err := app.db.GetDefinitions("sms.payment.success"); err == nil {
 		tpl := defs[0].Description // "Successfull Payment\nBill No.: %d"
 
-		sms := &messaging.Message{
-			Body: fmt.Sprintf(tpl, bookingID), // TODO: R
-		}
+		if defs, err := app.db.GetDefinitions("sms.sender_number"); err == nil {
+			sender := defs[0].Description
+			rcp := []string{
+				b.User.Phone,
+			}
 
-		app.msgGW.Send(sms)
+			sms := &messaging.Message{
+				Body:       fmt.Sprintf(tpl, bookingID),
+				Sender:     sender,
+				Recipients: rcp,
+			}
+
+			app.msgGW.Send(sms)
+		} else {
+			app.errorLog.Printf("Failed to find sms template on payment success [booking_id: %v] [err: %v]\n", bookingID, err)
+		}
 	} else {
 		app.errorLog.Printf("Failed to find sms template on payment success [booking_id: %v] [err: %v]\n", bookingID, err)
 	}
