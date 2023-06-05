@@ -221,6 +221,7 @@ type User struct {
 	FirstName   string
 	LastName    string
 	Email       string
+	Phone       string
 	Password    []byte
 	AccessLevel int
 	Bookings    []Booking `gorm:"polymorphic:Booker;"`
@@ -282,8 +283,10 @@ type Booking struct {
 	CancelledAt       time.Time
 	BookerID          int
 	BookerType        string
+	User              *User `gorm:"polymorphic:Bookings"`
 	BookableID        int
 	BookableType      string
+	Service           *Service `gorm:"polymorphic:Bookings"`
 	EstimatedMinutes  int
 	TransactionNumber int     `json:"transactionNumber"`
 	ServiceType       string  `json:"serviceType"`
@@ -363,6 +366,8 @@ func (m *Models) MakeBooking(vehicleType string, serviceType string, bookTime ti
 
 func (m *Models) GetBooking(id int) (*Booking, error) {
 	var booking Booking
+
+	m.db.Preload("User").Find(&booking, id)
 	if err := m.db.First(&booking, id).Error; err != nil {
 		return nil, err
 	}
@@ -372,6 +377,18 @@ func (m *Models) GetBooking(id int) (*Booking, error) {
 
 func (m *Models) UpdateBooking(id int, data map[string]string) error {
 	var b Booking
+	res := m.db.Model(&b).Where("id = ?", id).Updates(data)
+	if res.Error != nil {
+		return res.Error
+	} else if res.RowsAffected == 0 {
+		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func (m *Models) UpdateBooker(id int, data map[string]string) error {
+	var b User
 	res := m.db.Model(&b).Where("id = ?", id).Updates(data)
 	if res.Error != nil {
 		return res.Error
