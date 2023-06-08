@@ -3,6 +3,7 @@
 	padding: 10px 20px;
 	font-weight: 600;
 	transition: all 0.2s;
+	text-align: center;
 }
 
 .disabled {

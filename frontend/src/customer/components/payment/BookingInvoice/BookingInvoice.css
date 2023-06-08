@@ -1,0 +1,9 @@
+#booking-invoice {
+	width: 100%;
+}
+
+#booking-invoice .card {
+	background: #e9ecef;
+	padding: 15px 20px;
+	border-radius: 5px;
+}
