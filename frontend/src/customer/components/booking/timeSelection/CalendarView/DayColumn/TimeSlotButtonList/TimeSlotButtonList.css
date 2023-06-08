@@ -1,0 +1,43 @@
+#time-list ul {
+	list-style: none;
+	padding: 0;
+}
+
+#time-list li {
+	position: relative;
+	background: #dee2e6;
+	height: 50px;
+	padding: 10px;
+	border-radius: 5px;
+	font-size: 13px;
+	border: 0px #eee solid;
+	transition: 0.3s;
+}
+
+#time-list li.li-disabled {
+	background: #f3f3f3;
+}
+
+#time-list li input.hidden {
+	display: none;
+}
+
+#time-list li label {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 100%;
+	height: 50px;
+	border-radius: 5px;
+	transform: translate(-50%, -50%);
+	cursor: pointer;
+}
+
+#time-list li label.label-disabled {
+	opacity: 50%;
+	background: #f3f3f3;
+}
+
+#time-list li input:checked ~ label {
+	background: #ffd27a;
+}
