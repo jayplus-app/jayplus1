@@ -172,14 +172,12 @@ const ServiceTypeSelection = () => {
 
 	return (
 		<div id="service-type-selection">
-			<div className="w-full">
-				<h3>Service Type</h3>
-				<TypeList
-					types={serviceTypes}
-					select={(type) => setServiceTypeSelected(type)}
-				/>
-				<TypeDescription description={getDescription()} />
-			</div>
+			<h3 className="mt-4">Service Type</h3>
+			<TypeList
+				types={serviceTypes}
+				select={(type) => setServiceTypeSelected(type)}
+			/>
+			<TypeDescription description={getDescription()} />
 		</div>
 	)
 }

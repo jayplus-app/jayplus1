@@ -53,14 +53,12 @@ const VehicleTypeSelection = () => {
 
 	return (
 		<div id="vehicle-type-selection">
-			<div className="w-full">
-				<h3>Vehicle Type</h3>
-				<TypeList
-					types={vehicleTypes}
-					select={(type) => setVehicleTypeSelected(type)}
-				/>
-				<TypeDescription description={getDescription()} />
-			</div>
+			<h3>Vehicle Type</h3>
+			<TypeList
+				types={vehicleTypes}
+				select={(type) => setVehicleTypeSelected(type)}
+			/>
+			<TypeDescription description={getDescription()} />
 		</div>
 	)
 }

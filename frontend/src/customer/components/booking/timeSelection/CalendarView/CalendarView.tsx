@@ -47,7 +47,7 @@ const CalendarView = () => {
 	const isDisabled = dateToNumber(startDate) <= dateToNumber(todaysDate())
 
 	return (
-		<div className="flex w-full justify-between gap-2 mt-2">
+		<div className="flex justify-between gap-2 mt-2">
 			<div>
 				<DayNavigationButton
 					onClick={() => changeDate(-1)}
