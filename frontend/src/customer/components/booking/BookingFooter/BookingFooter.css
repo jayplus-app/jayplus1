@@ -1,0 +1,16 @@
+.footer-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.price {
+	margin-bottom: 4px;
+	margin-top: 2px;
+	font-size: 1.125rem; /* equivalent to text-lg in tailwind */
+}
+
+.price-amount {
+	font-weight: bold;
+}
