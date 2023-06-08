@@ -20,14 +20,16 @@ const BookingFooter = () => {
 
 	return (
 		<div id="booking-footer">
-			<div className="footer-container">
-				<div className="price">
+			<div className="flex flex-col items-center justify-center">
+				<div className="price mb-4 mt-2 text-lg">
 					Price: <span className="price-amount">${serviceCost}</span>
 				</div>
 				<Button
 					to="/payment"
 					disabled={isDisabled}
 					backgroundColor="#FFC960"
+					width="280px"
+					height="45px"
 				>
 					Payment
 				</Button>

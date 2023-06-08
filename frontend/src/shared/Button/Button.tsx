@@ -7,6 +7,8 @@ interface ButtonProps {
 	backgroundColor?: string
 	color?: string
 	fullWidth?: boolean
+	width?: string
+	height?: string
 	disabled?: boolean
 	onClick?: () => void
 	to?: string
@@ -18,6 +20,8 @@ const Button = ({
 	backgroundColor,
 	color,
 	fullWidth = false,
+	width = 'auto',
+	height = 'auto',
 	disabled = false,
 	onClick,
 	children,
@@ -27,7 +31,8 @@ const Button = ({
 	const style = {
 		backgroundColor: backgroundColor,
 		color: color,
-		width: fullWidth ? '100%' : 'auto',
+		width: fullWidth ? '100%' : width,
+		height: height,
 	}
 
 	// Checking whether it's a Link button or a normal button
@@ -35,7 +40,9 @@ const Button = ({
 		return (
 			<Link
 				to={to}
-				className={`btn ${disabled ? 'disabled' : ''}`}
+				className={`btn flex justify-center ${
+					disabled ? 'disabled' : ''
+				}`}
 				style={style}
 				onClick={onClick}
 			>
