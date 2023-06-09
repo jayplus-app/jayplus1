@@ -1,7 +1,6 @@
 import React from 'react'
 import './Button.css'
 import { Link } from 'react-router-dom'
-import { isDisabled } from '@testing-library/user-event/dist/utils'
 
 interface ButtonProps {
 	backgroundColor?: string
