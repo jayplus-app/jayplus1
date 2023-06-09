@@ -1,0 +1,9 @@
+.type-description {
+	background: #eaf1ef;
+	border-style: solid;
+	border-color: #034642;
+	border-width: 1px;
+	border-radius: 5px;
+	padding: 15px;
+	font-size: 13px;
+}

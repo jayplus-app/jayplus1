@@ -1,0 +1,11 @@
+.day-navigation-button {
+	background-color: #ced4da;
+	height: 50px;
+	width: 25px;
+	padding: 0;
+}
+
+.day-navigation-button.disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
