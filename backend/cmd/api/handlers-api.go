@@ -23,6 +23,8 @@ type dateTimeListRequestPayload struct {
 
 func (app *application) response(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 	w.WriteHeader(status)
 
 	if err := json.NewEncoder(w).Encode(data); err != nil {
@@ -111,6 +113,8 @@ func (app *application) DateTimeList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 
 	// Get timeframes for the specified date
 	timeslots, err := app.db.GetTimeframes(input.ServiceType, input.VehicleType, d)
