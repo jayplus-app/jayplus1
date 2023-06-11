@@ -205,7 +205,7 @@ func (app *application) Invoice(w http.ResponseWriter, r *http.Request) {
 }
 
 type payInvoiceRequestPayload struct {
-	BillNumber int    `json:"billNumber"`
+	BillNumber uint   `json:"billNumber"`
 	Phone      string `json:"phone"`
 }
 
@@ -225,15 +225,20 @@ func (app *application) PayInvoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]string{
+	data := map[string]interface{}{
 		"phone": input.Phone,
 	}
 
-	if err := app.db.UpdateBooker(booking.BookerID, data); err != nil {
+	booker, err := app.db.GetOrMakeBooker(data)
+	if err != nil {
 		if err.Error() == "no rows affected" {
 			app.errorLog.Printf("Failed to set booker's phone number on invoice payment request [booking_id: %v] [booker_id: %v] [err: %v]\n", booking.ID, booking.BookerID, err)
 			return
 		}
+	}
+
+	if err := app.db.AssociateBooking(booker, booking); err != nil {
+		app.errorLog.Printf("Failed to associate booker and booking on invoice payment request [booking_id: %v] [booker_id: %v] [err: %v]\n", booking.ID, booking.BookerID, err)
 	}
 
 	// Create a PaymentIntent with amount and currency
@@ -347,11 +352,13 @@ func (app *application) handlePaymentIntentSucceeded(paymentIntent stripe.Paymen
 		}
 	}
 
-	b, err := app.db.GetBooking(bookingID)
+	b, err := app.db.GetBooking(uint(bookingID))
 	if err != nil {
 		app.errorLog.Println(err)
 		return err
 	}
+
+	user, err := app.db.GetBooker(b.BookerID)
 
 	if defs, err := app.db.GetDefinitions("sms.payment.success"); err == nil {
 		tpl := defs[0].Description // "Successfull Payment\nBill No.: %d"
@@ -359,7 +366,7 @@ func (app *application) handlePaymentIntentSucceeded(paymentIntent stripe.Paymen
 		if defs, err := app.db.GetDefinitions("sms.sender_number"); err == nil {
 			sender := defs[0].Description
 			rcp := []string{
-				b.User.Phone,
+				user.Phone,
 			}
 
 			sms := &messaging.Message{

@@ -281,12 +281,10 @@ type Booking struct {
 	BookedAt          time.Time `json:"time"`
 	BookedUntil       time.Time
 	CancelledAt       time.Time
-	BookerID          int
+	BookerID          uint
 	BookerType        string
-	User              *User `gorm:"polymorphic:Bookings"`
-	BookableID        int
+	BookableID        uint
 	BookableType      string
-	Service           *Service `gorm:"polymorphic:Bookings"`
 	EstimatedMinutes  int
 	TransactionNumber int     `json:"transactionNumber"`
 	ServiceType       string  `json:"serviceType"`
@@ -364,15 +362,24 @@ func (m *Models) MakeBooking(vehicleType string, serviceType string, bookTime ti
 	return &booking, nil
 }
 
-func (m *Models) GetBooking(id int) (*Booking, error) {
+func (m *Models) GetBooking(id uint) (*Booking, error) {
 	var booking Booking
 
-	m.db.Preload("User").Find(&booking, id)
 	if err := m.db.First(&booking, id).Error; err != nil {
 		return nil, err
 	}
 
 	return &booking, nil
+}
+
+func (m *Models) GetBooker(id uint) (*User, error) {
+	var user User
+
+	if err := m.db.First(&user, id).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (m *Models) UpdateBooking(id int, data map[string]string) error {
@@ -387,7 +394,31 @@ func (m *Models) UpdateBooking(id int, data map[string]string) error {
 	return nil
 }
 
-func (m *Models) UpdateBooker(id int, data map[string]string) error {
+func (m *Models) MakeBooker(data map[string]interface{}) (*User, error) {
+	var u *User
+	res := m.db.Model(u).Create(data)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return u, nil
+}
+
+func (m *Models) GetOrMakeBooker(data map[string]interface{}) (*User, error) {
+	var u *User
+	res := m.db.Model(u).Where("phone = ?", data["phone"]).First(u)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	if u != nil {
+		return u, nil
+	}
+
+	return m.MakeBooker(data)
+}
+
+func (m *Models) UpdateBooker(id uint, data map[string]string) error {
 	var b User
 	res := m.db.Model(&b).Where("id = ?", id).Updates(data)
 	if res.Error != nil {
@@ -397,4 +428,8 @@ func (m *Models) UpdateBooker(id int, data map[string]string) error {
 	}
 
 	return nil
+}
+
+func (m *Models) AssociateBooking(booker *User, booking *Booking) error {
+	return m.db.Model(booker).Association("Bookings").Append(booking)
 }
