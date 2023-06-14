@@ -32,7 +32,8 @@ func (app *application) response(w http.ResponseWriter, status int, data interfa
 	}
 }
 
-type definitionRequestPayload struct {
+type definitionPayload struct {
+	ID          uint   `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Icon        string `json:"icon"`
@@ -48,7 +49,7 @@ func (app *application) NewServiceType(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) newDefinition(defType string, w http.ResponseWriter, r *http.Request) {
-	var payload definitionRequestPayload
+	var payload definitionPayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		app.errorLog.Println(err)
@@ -70,14 +71,31 @@ func (app *application) getDefinitions(defType string, w http.ResponseWriter, r 
 		return err
 	}
 
+	l := len(list)
+	types := make([]*definitionPayload, l, l)
+	for i, item := range list {
+		types[i] = &definitionPayload{
+			ID:          item.ID,
+			Name:        item.Name,
+			Description: item.Description,
+			Icon:        item.Icon,
+			Order:       item.Order,
+		}
+	}
+
 	out := map[string]interface{}{
 		"name":  defType,
-		"types": list,
+		"types": types,
 	}
 
 	app.response(w, http.StatusOK, out)
 
 	return nil
+}
+
+type definitionResponse struct {
+	models.Defintion
+	Order int `json:""`
 }
 
 func (app *application) VehicleTypes(w http.ResponseWriter, r *http.Request) {
@@ -172,6 +190,21 @@ type invoiceRequestPayload struct {
 	Time        time.Time `json:"time"`
 }
 
+type invoiceResponsePayload struct {
+	BillNumber        uint      `json:"billNumber"`
+	Time              time.Time `json:"time"`
+	CancelledAt       time.Time `json:"cancelledAt"`
+	TransactionNumber int       `json:"TransactionNumber"`
+	ServiceType       string    `json:"serviceType"`
+	VehicleType       string    `json:"vehicleType"`
+	ServiceCost       float32   `json:"serviceCost"`
+	Discount          float32   `json:"discount"`
+	Total             float32   `json:"total"`
+	Deposit           float32   `json:"deposit"`
+	Remaining         float32   `json:"remaining"`
+	PayedAt           time.Time `json:"payedAt"`
+}
+
 func (app *application) Invoice(w http.ResponseWriter, r *http.Request) {
 	var input invoiceRequestPayload
 
@@ -202,7 +235,22 @@ func (app *application) Invoice(w http.ResponseWriter, r *http.Request) {
 	// 	"Remaining": "139.00 $"
 	// }`)
 
-	out, err := json.Marshal(booking)
+	bookingResponse := &invoiceResponsePayload{
+		BillNumber:        booking.ID,
+		Time:              booking.BookedAt,
+		CancelledAt:       booking.CancelledAt,
+		TransactionNumber: booking.TransactionNumber,
+		ServiceType:       booking.ServiceType,
+		VehicleType:       booking.VehicleType,
+		ServiceCost:       booking.ServiceCost,
+		Discount:          booking.Discount,
+		Total:             booking.Total,
+		Deposit:           booking.Deposit,
+		Remaining:         booking.Remaining,
+		PayedAt:           booking.PayedAt,
+	}
+
+	out, err := json.Marshal(bookingResponse)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
