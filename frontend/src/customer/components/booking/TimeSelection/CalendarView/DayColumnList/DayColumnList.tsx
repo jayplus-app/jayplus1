@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
+import CustomerBookingContext from '../../../../../context/CustomerBookingContext'
 import DayColumn from '../DayColumn'
 
 interface TimeSlot {
@@ -17,6 +18,10 @@ const DayColumnList = ({ startDate }: DayColumnListProps) => {
 		Record<string, TimeSlot[]>
 	>({})
 
+	const { vehicleTypeSelected, serviceTypeSelected } = useContext(
+		CustomerBookingContext
+	)
+
 	useEffect(() => {
 		const fetchData = (date: string) => {
 			const headers = new Headers()
@@ -27,11 +32,13 @@ const DayColumnList = ({ startDate }: DayColumnListProps) => {
 				method: 'POST',
 				headers: headers,
 				body: JSON.stringify({
-					vehicleType: 'Sedan',
-					serviceType: 'Show Room',
+					vehicleType: vehicleTypeSelected || 'Sedan',
+					serviceType: serviceTypeSelected || 'Show Room',
 					dateTime: date,
 				}),
 			}
+
+			console.log(options)
 
 			fetch('/api/v1.0/booking/date-time-list', options)
 				.then((response) => response.json())
@@ -74,7 +81,7 @@ const DayColumnList = ({ startDate }: DayColumnListProps) => {
 		]
 
 		dates.forEach((date) => fetchData(date))
-	}, [startDate])
+	}, [startDate, vehicleTypeSelected, serviceTypeSelected])
 
 	return (
 		<div className="grid grid-cols-3 gap-4 w-full justify-between text-center">
