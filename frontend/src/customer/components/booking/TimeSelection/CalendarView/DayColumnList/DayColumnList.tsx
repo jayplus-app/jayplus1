@@ -38,8 +38,6 @@ const DayColumnList = ({ startDate }: DayColumnListProps) => {
 				}),
 			}
 
-			console.log(options)
-
 			fetch('/api/v1.0/booking/date-time-list', options)
 				.then((response) => response.json())
 				.then((data) => {
