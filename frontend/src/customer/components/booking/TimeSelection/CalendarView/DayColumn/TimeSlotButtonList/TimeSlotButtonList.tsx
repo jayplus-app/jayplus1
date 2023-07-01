@@ -7,7 +7,6 @@ interface TimeSlot {
 	end: string
 	freeMinutes: number
 	available: boolean
-	isPast: boolean
 }
 
 interface TimeSlotButtonListProps {
@@ -33,7 +32,9 @@ const TimeSlotButtonList = ({
 				{timeSlotList.map((time) => (
 					<li
 						key={date + time.start}
-						className={`mb-4 ${!time.isPast ? 'li-disabled' : ''}`}
+						className={`mb-4 ${
+							!time.available ? 'li-disabled' : ''
+						}`}
 					>
 						<input
 							type="radio"
@@ -43,12 +44,12 @@ const TimeSlotButtonList = ({
 							value={date + time.start}
 							onChange={handleChange}
 							checked={dateTimeSelected === date + time.start}
-							disabled={!time.isPast}
+							disabled={!time.available}
 						/>
 						<label
 							htmlFor={date + time.start}
 							className={`flex flex-col items-center justify-center ${
-								!time.isPast ? 'label-disabled' : ''
+								!time.available ? 'label-disabled' : ''
 							}`}
 						>
 							{time.start}

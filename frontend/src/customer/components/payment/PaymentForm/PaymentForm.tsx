@@ -2,10 +2,23 @@ import Button from '../../../../shared/Button/Button'
 import './PaymentForm.css'
 
 interface PaymentFormProps {
-	price: string
+	invoiceDetails: {
+		billNumber: number
+		time: string
+		cancelledAt: string
+		TransactionNumber: number
+		serviceType: string
+		vehicleType: string
+		serviceCost: number
+		discount: number
+		total: number
+		deposit: number
+		remaining: number
+		payedAt: string
+	}
 }
 
-const PaymentForm = ({ price }: PaymentFormProps) => {
+const PaymentForm = ({ invoiceDetails }: PaymentFormProps) => {
 	return (
 		<div id="payment-form">
 			<form className="w-full mt-4">
@@ -90,7 +103,7 @@ const PaymentForm = ({ price }: PaymentFormProps) => {
 						backgroundColor="#FFC960"
 						fullWidth={true}
 					>
-						Pay {price}
+						Pay {invoiceDetails.deposit}
 					</Button>
 				</div>
 			</form>

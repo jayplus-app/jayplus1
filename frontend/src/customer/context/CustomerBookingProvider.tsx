@@ -8,8 +8,8 @@ interface CustomerBookingProviderProps {
 const CustomerBookingProvider = ({
 	children,
 }: CustomerBookingProviderProps) => {
-	const [vehicleTypeSelected, setVehicleTypeSelected] = useState('')
-	const [serviceTypeSelected, setServiceTypeSelected] = useState('')
+	const [vehicleTypeSelected, setVehicleTypeSelected] = useState('Sedan')
+	const [serviceTypeSelected, setServiceTypeSelected] = useState('Show Room')
 	const [dateTimeSelected, setDateTimeSelected] = useState('')
 	const [serviceCost, setServiceCost] = useState(0)
 

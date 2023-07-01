@@ -1,13 +1,12 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import DayNavigationButton from './DayNavigationButton'
 import DayColumnList from './DayColumnList'
 
 const todaysDate = () => {
-	return '2023-01-20'
-	// const today = new Date();
-	// return (`${today.getFullYear()}-${
-	//     (today.getMonth() + 1).toString().padStart(2, '0')}-${
-	//         today.getDate().toString().padStart(2, '0')}`)
+	const today = new Date()
+	return `${today.getFullYear()}-${(today.getMonth() + 1)
+		.toString()
+		.padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`
 }
 
 const dateToNumber = (inputDate: any) => {
@@ -38,7 +37,7 @@ const addDaysToDate = (inputDate: string, by: number) => {
 }
 
 const CalendarView = () => {
-	const [startDate, setStartDate] = useState('2023-01-20')
+	const [startDate, setStartDate] = useState(todaysDate())
 
 	const changeDate = (by: number) => {
 		setStartDate(addDaysToDate(startDate, by))
@@ -56,7 +55,7 @@ const CalendarView = () => {
 					{'<<'}
 				</DayNavigationButton>
 			</div>
-			<DayColumnList startDate={startDate} />
+			<DayColumnList key={startDate} startDate={startDate} />
 			<div>
 				<DayNavigationButton onClick={() => changeDate(1)}>
 					{'>>'}
