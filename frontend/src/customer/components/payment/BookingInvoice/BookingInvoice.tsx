@@ -1,19 +1,22 @@
 import './BookingInvoice.css'
 
+interface InvoiceDetails {
+	billNumber: number
+	time: string
+	cancelledAt: string
+	TransactionNumber: number
+	serviceType: string
+	vehicleType: string
+	serviceCost: number
+	discount: number
+	total: number
+	deposit: number
+	remaining: number
+	payedAt: string
+}
+
 interface BookingInvoiceProps {
-	invoiceDetails: {
-		TransactionNumber: string
-		BillNumber: string
-		ServiceType: string
-		VehicleType: string
-		Date: string
-		Time: string
-		ServiceCost: string
-		Discount: string
-		Total: string
-		Deposit: string
-		Remaining: string
-	}
+	invoiceDetails: InvoiceDetails
 }
 
 const BookingInvoice = ({ invoiceDetails }: BookingInvoiceProps) => {

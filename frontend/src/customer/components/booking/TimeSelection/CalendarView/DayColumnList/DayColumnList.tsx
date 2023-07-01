@@ -32,8 +32,8 @@ const DayColumnList = ({ startDate }: DayColumnListProps) => {
 				method: 'POST',
 				headers: headers,
 				body: JSON.stringify({
-					vehicleType: vehicleTypeSelected || 'Sedan',
-					serviceType: serviceTypeSelected || 'Show Room',
+					vehicleType: vehicleTypeSelected,
+					serviceType: serviceTypeSelected,
 					dateTime: date,
 				}),
 			}
