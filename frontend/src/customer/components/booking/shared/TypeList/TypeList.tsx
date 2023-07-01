@@ -1,14 +1,6 @@
-import { useState, useContext, ChangeEvent } from 'react'
+import { useState, useContext, ChangeEvent, useEffect } from 'react'
 import './TypeList.css'
 import CustomerBookingContext from '../../../../context/CustomerBookingContext'
-
-function calculatePrice(
-	vehicleTypeSelected: string,
-	serviceTypeSelected: string
-) {
-	// Calculate the price based on the vehicle type and service type selected
-	return 140
-}
 
 interface Type {
 	id: string
@@ -26,16 +18,32 @@ interface TypeListProps {
 	select: (selected: string) => void
 }
 
-function TypeList({ types, select }: TypeListProps) {
-	// Set the default selected type to the first type in the types list
-	const [selected, setSelected] = useState(types.types[0].name)
-	// Function received as a prop from the parent component that is called when a type is selected.
-	// Function passes the state to parent component, which then sets the state in context.
-	select(selected)
+function getPrice(vehicleTypeSelected: string, serviceTypeSelected: string) {
+	// Fetch the price data from the backend based on the vehicle type and service type selected
+	return fetch('/api/v1.0/booking/price', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Accept: 'application/json',
+		},
+		body: JSON.stringify({
+			vehicleType: vehicleTypeSelected || 'Sedan',
+			serviceType: serviceTypeSelected || 'Show Room',
+			time: '2024-06-29T10:00:00Z',
+		}),
+	})
+		.then((response) => response.json())
+		.then((price) => {
+			return price
+		})
+		.catch((error) => {
+			console.log(error)
+			return 0
+		})
+}
 
-	// Retrieve the state of vehicleTypeSelected and serviceTypeSelected from context to calculate the price
-	// setServiceCost are also retrieved from context to reset the service cost when a new type is selected
-	// setDateTimeSelected is also retrieved from context to deselect the date and time when a new type is selected
+function TypeList({ types, select }: TypeListProps) {
+	const [selected, setSelected] = useState(types.types[0].name)
 	const {
 		vehicleTypeSelected,
 		serviceTypeSelected,
@@ -43,19 +51,20 @@ function TypeList({ types, select }: TypeListProps) {
 		setDateTimeSelected,
 	} = useContext(CustomerBookingContext)
 
-	// Calculate the price when a new type is selected and set the service cost in context
-	setServiceCost(calculatePrice(vehicleTypeSelected, serviceTypeSelected))
+	useEffect(() => {
+		getPrice(vehicleTypeSelected, serviceTypeSelected).then((price) => {
+			setServiceCost(price)
+		})
+	}, [vehicleTypeSelected, serviceTypeSelected, setServiceCost])
 
-	// Function to handle the change of the type selected
 	const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-		// Set the state of selected to the value of the type selected
 		setSelected(e.currentTarget.value)
-		// Call the function received as a prop from the parent component to set the state in context
 		select(e.currentTarget.value)
-		// Calculate the price when a new type is selected and set the service cost in context
-		setServiceCost(calculatePrice(vehicleTypeSelected, serviceTypeSelected))
-		// Deselect the date and time when a new type is selected
 		setDateTimeSelected('')
+
+		getPrice(vehicleTypeSelected, serviceTypeSelected).then((price) => {
+			setServiceCost(price)
+		})
 	}
 
 	return (
@@ -64,41 +73,37 @@ function TypeList({ types, select }: TypeListProps) {
 			className="type-list items-center justify-between mt-2"
 		>
 			<ul className="type-list-ul flex gap-2">
-				{types.types.map(
-					(
-						type // Map through the types list and return a list item for each type
-					) => (
-						<li
-							className="type-list-li border-2 w-1/4 text-center"
-							key={type.id}
+				{types.types.map((type) => (
+					<li
+						className="type-list-li border-2 w-1/4 text-center"
+						key={type.id}
+					>
+						<input
+							className="type-list-input hidden"
+							type="radio"
+							id={type.id}
+							name={types.name}
+							value={type.name}
+							onChange={handleChange}
+							checked={selected === type.name}
+						/>
+						<label
+							htmlFor={type.id}
+							className="type-list-label flex flex-col items-center justify-center"
 						>
-							<input
-								className="type-list-input hidden"
-								type="radio"
-								id={type.id}
-								name={types.name}
-								value={type.name}
-								onChange={handleChange}
-								checked={selected === type.name}
-							/>
-							<label
-								htmlFor={type.id}
-								className="type-list-label flex flex-col items-center justify-center"
+							<img src={type.icon} alt="" />
+							<span
+								className={
+									type.name === 'Large SUV / Truck'
+										? 'type-list-label-span-small'
+										: 'type-list-label-span'
+								}
 							>
-								<img src={type.icon} alt="" />
-								<span
-									className={
-										type.name === 'Large SUV / Truck'
-											? 'type-list-label-span-small'
-											: 'type-list-label-span'
-									}
-								>
-									{type.name}
-								</span>
-							</label>
-						</li>
-					)
-				)}
+								{type.name}
+							</span>
+						</label>
+					</li>
+				))}
 			</ul>
 		</div>
 	)
