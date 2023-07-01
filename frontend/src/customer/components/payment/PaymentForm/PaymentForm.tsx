@@ -34,20 +34,29 @@ const PaymentForm = ({ invoiceDetails }: PaymentFormProps) => {
 	const [clientSecret, setClientSecret] = useState('')
 
 	useEffect(() => {
-		// Create PaymentIntent as soon as the page loads
-		fetch('http://localhost:4242/create-payment-intent', {
+		const headers = new Headers()
+		headers.append('Content-Type', 'application/json')
+		headers.append('Accept', 'application/json')
+
+		const options = {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
+			headers: headers,
 			body: JSON.stringify({
 				billNumber: invoiceDetails.billNumber,
-				phone: '1234567890',
 			}),
-		})
+		}
+		// Create PaymentIntent as soon as the page loads
+		// fetch('/api/v1.0/booking/pay-invoice', options)
+		fetch('http://localhost:4242/create-payment-intent', options)
 			.then((res) => {
 				return res.json()
 			})
 			.then((data) => {
 				setClientSecret(data.clientSecret)
+			})
+			.catch((error) => {
+				console.log('Error')
+				console.log(error)
 			})
 	}, [invoiceDetails.billNumber])
 
