@@ -18,17 +18,17 @@ The admin interface, accessible via the "/admin" route, allows administrators to
 
 The backend is written in Golang and serves as a REST API. It is also divided into two parts, each handling functionalities specific to the Customer and Admin.
 
-### Customer-specific Endpoints:
-
+### Shared Endpoints
 - Get Vehicle Types
 - Get Service Types
 - Calculate Price
 - Get Available Times
 - Create Invoice
+
+### Customer Endpoints:
 - Create Payment Intent (Stripe)
 
 ### Admin-specific Endpoints:
-
 - Login
 - Confirm Booking
 - Get Bookings
@@ -39,14 +39,3 @@ The backend is written in Golang and serves as a REST API. It is also divided in
 
 The database uses PostgreSQL and stores data related to bookings, services, vehicles, invoices, payments, and user details.
 
-## Documentation
-
-Detailed documentation of JayPlus can be found in the [docs](./docs) directory.
-
-## Contributing
-
-Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](./LICENSE.md) file for details
