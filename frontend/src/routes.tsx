@@ -4,6 +4,8 @@ import AdminApp from './admin/AdminApp'
 import CustomerBookingPage from './customer/pages/booking/CustomerBookingPage'
 import CustomerPaymentPage from './customer/pages/payment/CustomerPaymentPage'
 import CustomerPaymentSuccessPage from './customer/pages/payment/CustomerPaymentSuccessPage'
+import AuthApp from './auth/AuthApp'
+import LoginPage from './auth/pages/LoginPage/LoginPage'
 
 const router = createBrowserRouter([
 	{
@@ -21,6 +23,16 @@ const router = createBrowserRouter([
 			{
 				path: 'payment-success',
 				element: <CustomerPaymentSuccessPage />,
+			},
+		],
+	},
+	{
+		path: '/auth',
+		element: <AuthApp />,
+		children: [
+			{
+				path: 'login',
+				element: <LoginPage />,
 			},
 		],
 	},
