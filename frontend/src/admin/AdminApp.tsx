@@ -1,5 +1,7 @@
+import { Outlet } from 'react-router-dom'
+
 const AdminApp = () => {
-	return <div>AdminApp</div>
+	return <Outlet />
 }
 
 export default AdminApp
