@@ -1,10 +1,10 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useCallback } from 'react'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import AuthContext from '../auth/context/AuthContext'
 
 const AdminApp = () => {
-	const { authToken, setAuthToken } = useContext(AuthContext)
-
+	const { authToken, setAuthToken, setRefreshInterval } =
+		useContext(AuthContext)
 	const navigate = useNavigate()
 
 	const logOut = () => {
@@ -17,30 +17,36 @@ const AdminApp = () => {
 			.catch((error) => console.error('Error logging out', error))
 			.finally(() => {
 				setAuthToken('')
+				setRefreshInterval(false)
 			})
 
 		navigate('/auth/login')
 	}
 
+	const refreshAuthToken = useCallback(() => {
+		const options: RequestInit = {
+			method: 'GET',
+			credentials: 'include',
+		}
+
+		fetch('/refresh', options)
+			.then((res) => res.json())
+			.then((data) => {
+				if (data.access_token) {
+					setAuthToken(data.access_token)
+					setRefreshInterval(true)
+				}
+			})
+			.catch((err) => {
+				console.log('User not logged in')
+			})
+	}, [setAuthToken, setRefreshInterval]) // these are the dependencies
+
 	useEffect(() => {
 		if (authToken === '') {
-			const options: RequestInit = {
-				method: 'GET',
-				credentials: 'include',
-			}
-
-			fetch('/refresh', options)
-				.then((res) => res.json())
-				.then((data) => {
-					if (data.access_token) {
-						setAuthToken(data.access_token)
-					}
-				})
-				.catch((err) => {
-					console.log('User not logged in')
-				})
+			refreshAuthToken()
 		}
-	}, [authToken, setAuthToken])
+	}, [authToken, refreshAuthToken])
 
 	return (
 		<div>
