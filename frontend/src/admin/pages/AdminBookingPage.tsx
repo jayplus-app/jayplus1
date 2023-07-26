@@ -1,5 +1,5 @@
 const AdminBookingPage = () => {
-	return <div>AdminBookingPage</div>
+	return <div>Admin Booking Page</div>
 }
 
 export default AdminBookingPage

@@ -45,7 +45,11 @@ const router = createBrowserRouter([
 	},
 	{
 		path: '/admin',
-		element: <AdminApp />,
+		element: (
+			<AuthProvider>
+				<AdminApp />
+			</AuthProvider>
+		),
 		children: [
 			{
 				path: 'booking',

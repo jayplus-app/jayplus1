@@ -24,12 +24,12 @@ const LoginForm = () => {
 			password: password,
 		}
 
-		const options = {
+		const options: RequestInit = {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			credendials: 'include',
+			credentials: 'include',
 			body: JSON.stringify(payload),
 		}
 
