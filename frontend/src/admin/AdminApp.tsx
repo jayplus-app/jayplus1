@@ -13,7 +13,7 @@ const AdminApp = () => {
 			credentials: 'include',
 		}
 
-		fetch('/logout', options)
+		fetch('/auth/logout', options)
 			.catch((error) => console.error('Error logging out', error))
 			.finally(() => {
 				setAuthToken('')
@@ -29,7 +29,7 @@ const AdminApp = () => {
 			credentials: 'include',
 		}
 
-		fetch('/refresh', options)
+		fetch('/auth/refresh', options)
 			.then((res) => res.json())
 			.then((data) => {
 				if (data.access_token) {

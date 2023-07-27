@@ -28,7 +28,7 @@ const LoginForm = () => {
 				body: JSON.stringify(payload),
 			}
 
-			fetch('/authenticate', options)
+			fetch('/auth/login', options)
 				.then((res) => res.json())
 				.then((data) => {
 					if (data.error) {
